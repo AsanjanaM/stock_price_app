@@ -3,6 +3,9 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 import yfinance as yf
+from pathlib import Path
+import pickle
+import streamlit_authenticator as stauth
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 from sklearn.model_selection import train_test_split
@@ -62,26 +65,27 @@ st.markdown(
     )
 
 def main():
-        st.header("STOCK PRICE PREDICTION")
-        selected_symbols = st.multiselect('Select symbols', ('ADBE', 'GOOG', 'AMZN', 'F', 'UPWK', 'EBAY', 'DDOG', 'AAPL', 'TLSA', 'UPST', 'UBER', 'MDB'))  
-        start_date = st.date_input('Start date')
-        end_date = st.date_input('End date')
-        
-        selected_data = None
+    st.markdown("<h1 style='color: #D8BFD8; font-family:Gabriola, Times, serif;'>STOCK PRICE PREDICITION</h1>", unsafe_allow_html=True)
 
-        if st.button('Submit'):
+    selected_symbols = st.multiselect('Select symbols', ('ADBE', 'GOOG', 'AMZN', 'F', 'UPWK', 'EBAY', 'DDOG', 'AAPL', 'TLSA', 'UPST', 'UBER', 'MDB'))  
+    start_date = st.date_input('Start date')
+    end_date = st.date_input('End date')
+        
+    selected_data = None
+
+    if st.button('Submit'):
             if selected_symbols and start_date and end_date:
                 selected_data = get_selected_stock_data(selected_symbols, start_date, end_date)
             else:
                 st.warning("Please select symbols and date range to fetch data.")
                 
                 
-        display_option = st.radio("Select Display Option", ["Prediction Price", "Graphs", "Analysis"])
+    display_option = st.radio("Select Display Option", ["Prediction Price", "Graphs", "Analysis"])
     
 
 
 
-        if display_option == "Prediction Price":
+    if display_option == "Prediction Price":
          if selected_data is not None:
            for symbol in selected_symbols:
             data = selected_data.get(symbol)
@@ -114,11 +118,11 @@ def main():
                     price_difference = predictions[i] - current_price
 
                     if price_difference > 0:
-                        prediction_message = f"The predicted price is higher  ."
+                        prediction_message = f"The predicted price is higher than the current price ."
                         prediction_symbol = "↑"
                         prediction_color = "#90EE90"
                     elif price_difference < 0:
-                        prediction_message = f"The predicted price is lower ."
+                        prediction_message = f"The predicted price is lower than the current price."
                         prediction_symbol = "↓"
                         prediction_color = "#CD5C5C"
                     else:
@@ -136,7 +140,7 @@ def main():
 
 
 
-        if display_option == "Graphs":
+    if display_option == "Graphs":
          if selected_data is not None:
           for symbol, data in selected_data.items():
             fig, ax = plt.subplots(figsize=(12, 6))
@@ -178,7 +182,7 @@ def main():
 
 
 
-        if display_option == "Analysis":
+    if display_option == "Analysis":
             if selected_data is not None:
                 st.markdown("<h2 style='color: #E6E6FA'>Statistical Analysis</h2>", unsafe_allow_html=True)
 
@@ -186,8 +190,8 @@ def main():
                     st.write(f"**{symbol}**")
 
                     stats_data = {
-                        "Metric": ["Mean", "Standard Deviation ", "Maximum ",
-                                "Minimum ", "Median"],
+                        "Metric": ["Mean Close Price", "Standard Deviation of Close Price", "Maximum Close Price",
+                                "Minimum Close Price", "Median Close Price"],
                         "Value": [data['Close'].mean(), data['Close'].std(), data['Close'].max(),
                                 data['Close'].min(), data['Close'].median()]
                     }
